@@ -1,0 +1,18 @@
+<package>
+  <description brief="rosleapm_src">
+
+     rosleapm_src
+
+  </description>
+  <author>jackie</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rosleapm_src</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="roslisp"/>
+  <depend package="std_msgs"/>
+
+</package>
+
+
