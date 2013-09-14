@@ -4,3 +4,5 @@ bin
 *.pyc
 build/*
 build
+rosleap_msg/msg_gen
+rosleap_msg/src
