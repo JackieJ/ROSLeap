@@ -6,3 +6,5 @@ build/*
 build
 rosleap_msg/msg_gen
 rosleap_msg/src
+ardrone_autonomy
+tum_ardrone

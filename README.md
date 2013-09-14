@@ -7,4 +7,8 @@
           
 _Warning: updating the kernel might cause some malfunctionality of the system._       
 * Enter `export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/where/is/ROSLeap` to `~/.bashrc`, and run `source ~/.bashrc`.
-* If you haven't installed the Leapmotion driver for Linux, please run `./setup.sh` in this repository.   
+* Please run `./install_leap.sh` under the root directory to make sure the Leapmotion driver is installed and all ROS packages are rosmade.      
+
+###Samples       
+* Leap-A.R.Drone       
+  * run `./leap_ardrone.sh` to set up the A.R.Drone.
