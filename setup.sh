@@ -10,3 +10,5 @@ else
         sudo dpkg --install ./leapsetup/Leap-0.8.0-x86.deb
     fi
 fi
+
+rosmake rosleap_msg && rosmake rosleapm_src && rosmake rosleap_samples
