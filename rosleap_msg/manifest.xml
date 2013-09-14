@@ -1,0 +1,17 @@
+<package>
+  <description brief="rosleap_msg">
+
+     rosleap_msg
+
+  </description>
+  <author>jackie</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rosleap_msg</url>
+  <depend package="rospy"/>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+
+</package>
+
+
