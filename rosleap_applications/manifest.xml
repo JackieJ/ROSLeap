@@ -1,0 +1,17 @@
+<package>
+  <description brief="rosleap_applications">
+
+     rosleap_applications
+
+  </description>
+  <author>jackie</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rosleap_applications</url>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="std_msgs"/>
+
+</package>
+
+
