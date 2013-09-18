@@ -22,6 +22,19 @@ class ROSLeapListener(Leap.Listener):
         rospy.init_node('ROSLeapNode')
         rosprint("initialzing leapmotion...")
         #define msg
+        self.LeapFrameMsg = {
+            'id':0,
+            'timeStamp':0,
+            'hands':[],
+            'fingers':[],
+            'tools':[],
+            'gestures':[],
+            'conncted': False,
+            'deviceVector':{
+                'cartesian':[0,0,0], #x,y,z,
+                'angular':[0,0,0] #pitch, yaw, roll
+                }
+            }
         
     def on_connect(self, controller):
         rosprint("leapmotion connected...ready to retrieve frame data...")
@@ -38,11 +51,19 @@ class ROSLeapListener(Leap.Listener):
     #dispatched to the listener when it's removed from the controller
     def on_exit(self, controller):
         rosprint("leapmotion exited...")
+    
     def on_frame(self, controller):
         frame = controller.frame()
-        frameInfoStr = "[LEAP]FrameID:"+str(frame.id)
-        rosprint(frameInfoStr)
+        #rosprint(str(frame.id))
+        #frameId
+        self.LeapFrameMsg['id'] = frame.id
         
+        #device vector:x,y,z,yaw,pitch,roll 
+        vector = Leap.Vector()
+        #rosprint(str(vector.to_float_array()))
+        self.LeapFrameMsg['deviceVector']['cartesian'] = vector.to_float_array()
+        
+        rosprint(str(self.LeapFrameMsg))
     def publish(self):
         pass
 
