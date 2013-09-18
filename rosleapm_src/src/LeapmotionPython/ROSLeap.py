@@ -61,8 +61,20 @@ class ROSLeapListener(Leap.Listener):
         #device vector:x,y,z,yaw,pitch,roll 
         vector = Leap.Vector()
         #rosprint(str(vector.to_float_array()))
+        #cartesian coordinates
         self.LeapFrameMsg['deviceVector']['cartesian'] = vector.to_float_array()
-        
+        #angular coordinates
+        self.LeapFrameMsg['deviceVector']['angular'] = [vector.pitch, vector.yaw, vector.roll]
+        #time stamp
+        self.LeapFrameMsg['timeStamp'] = frame.timestamp
+        #hands
+        self.LeapFrameMsg['hands'] = frame.hands
+        #fingers
+        self.LeapFrameMsg['fingers'] = frame.fingers
+        #tools
+        self.LeapFrameMsg['tools'] = frame.tools
+        #gestures
+        self.LeapFrameMsg['gestures'] = frame.gestures()
         rosprint(str(self.LeapFrameMsg))
     def publish(self):
         pass
