@@ -12,8 +12,6 @@ import rospy
 import roslib; roslib.load_manifest("rosleap_msg")
 from rosleap_msg.msg import *
 
-
-
 def rosprint(string):
     rospy.loginfo(string)
 
@@ -21,6 +19,8 @@ class ROSLeapListener(Leap.Listener):
     def on_init(self, controller):
         rospy.init_node('ROSLeapNode')
         rosprint("initialzing leapmotion...")
+        #ROS topic handle
+        self.LeapMsg = LeapMsg()
         #define msg
         self.LeapFrameMsg = {
             'id':0,
