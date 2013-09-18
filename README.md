@@ -10,5 +10,9 @@ _Warning: updating the kernel might cause some malfunctionality of the system._
 * Please run `./install_leap.sh` under the root directory to make sure the Leapmotion driver is installed and all ROS packages are rosmade.      
 
 ###Applications       
+* Leapmotion Message Test      
+  * run `./Leap.sh` under the `launch` folder     
 * Leap-A.R.Drone       
-  * run `./leap_ardrone.sh` to set up the A.R.Drone.
+  * run `./setup_ardrone.sh` to set up A.R.Drone          
+  * run `./LeapARDrone.sh` under the `launch` folder to control with Leapmotion     
+
