@@ -20,7 +20,8 @@ class ROSLeapListener(Leap.Listener):
         rospy.init_node('ROSLeapNode')
         rosprint("initialzing leapmotion...")
         #ROS topic handle
-        self.LeapMsg = LeapMsg()
+        self.LeapMsg = LeapmotionMsg()
+        self.LeapPub = rospy.Publisher('/leap', LeapmotionMsg)
         #define msg
         self.LeapFrameMsg = {
             'id':0,
@@ -29,6 +30,7 @@ class ROSLeapListener(Leap.Listener):
             'fingers':[],
             'tools':[],
             'gestures':[],
+            'pointables':[],
             'conncted': False,
             'deviceVector':{
                 'cartesian':[0,0,0], #x,y,z,
@@ -57,7 +59,6 @@ class ROSLeapListener(Leap.Listener):
         #rosprint(str(frame.id))
         #frameId
         self.LeapFrameMsg['id'] = frame.id
-        
         #device vector:x,y,z,yaw,pitch,roll 
         vector = Leap.Vector()
         #rosprint(str(vector.to_float_array()))
@@ -73,11 +74,21 @@ class ROSLeapListener(Leap.Listener):
         self.LeapFrameMsg['fingers'] = frame.fingers
         #tools
         self.LeapFrameMsg['tools'] = frame.tools
+        #pointables
+        self.LeapFrameMsg['pointables'] = frame.pointables
         #gestures
         self.LeapFrameMsg['gestures'] = frame.gestures()
-        rosprint(str(self.LeapFrameMsg))
+        #rosprint(str(self.LeapFrameMsg))
+        
+        #publish
+        self.publish()
     def publish(self):
-        pass
+        self.LeapMsg.frameID = self.LeapFrameMsg['id']
+        self.LeapMsg.timeStamp = self.LeapFrameMsg['timeStamp']
+        self.LeapMsg.vector.cartesian = self.LeapFrameMsg['deviceVector']['cartesian']
+        self.LeapMsg.vector.angular = self.LeapFrameMsg['deviceVector']['angular']
+        
+        self.LeapPub.publish(self.LeapMsg)
 
 if __name__ == "__main__":
     listener = ROSLeapListener()
