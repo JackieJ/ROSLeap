@@ -19,53 +19,95 @@ class ROSLeapMsg:
     def __init__(self, frame):
         self.frame = frame
         #define msg
-        self.LeapFrameMsg = {
-            'id':0,
-            'timeStamp':0,
-            'hands':[],
-            'fingers':[],
-            'tools':[],
-            'gestures':[],
-            'pointables':[],
-            'conncted': False,
-            'deviceVector':{
-                'cartesian':[0,0,0], #x,y,z,
-                'angular':[0,0,0] #pitch, yaw, roll
-                }
-            }
+        self.LeapFrameMsg = LeapmotionMsg()
+        # self.LeapFrameMsg = {
+        #     'id':0,
+        #     'timeStamp':0,
+        #     'hands':[],
+        #     'fingers':[],
+        #     'tools':[],
+        #     'gestures':[],
+        #     'pointables':[],
+        #     'conncted': False,
+        #     'deviceVector':{
+        #         'cartesian':[0,0,0], #x,y,z,
+        #         'angular':[0,0,0] #pitch, yaw, roll
+        #         }
+        #     }
         
     def getMsg(self):
         #frameId
-        self.LeapFrameMsg['id'] = self.frame.id
+        self.LeapFrameMsg.frameID = self.frame.id
         #device vector:x,y,z,yaw,pitch,roll 
         vector = Leap.Vector()
-        #rosprint(str(vector.to_float_array()))
         #cartesian coordinates
-        self.LeapFrameMsg['deviceVector']['cartesian'] = vector.to_float_array()
+        self.LeapFrameMsg.vector.cartesian = vector.to_float_array()
         #angular coordinates
-        self.LeapFrameMsg['deviceVector']['angular'] = [vector.pitch, vector.yaw, vector.roll]
+        self.LeapFrameMsg.vector.angular = [vector.pitch, vector.yaw, vector.roll]
         #time stamp
-        self.LeapFrameMsg['timeStamp'] = self.frame.timestamp
-        #hands
-        self.LeapFrameMsg['hands'] = self.frame.hands
-        #fingers
-        self.LeapFrameMsg['fingers'] = self.frame.fingers
-        #tools
-        self.LeapFrameMsg['tools'] = self.frame.tools
-        #pointables
-        self.LeapFrameMsg['pointables'] = self.frame.pointables
-        #gestures
-        self.LeapFrameMsg['gestures'] = self.frame.gestures()
-        #rosprint(str(self.LeapFrameMsg))
-        return self.LeapFrameMsg
+        self.LeapFrameMsg.timeStamp = self.frame.timestamp
         
+        #hands
+        for hand in self.frame.hands:
+            self.LeapFrameMsg.hands.append(self.getHand(hand))
+        
+        #fingers
+        #self.LeapFrameMsg['fingers'] = self.frame.fingers
+        
+        #tools
+        #self.LeapFrameMsg['tools'] = self.frame.tools
+        
+        #pointables
+        #self.LeapFrameMsg['pointables'] = self.frame.pointables
+        
+        #gestures
+        #self.LeapFrameMsg['gestures'] = self.frame.gestures()
+        
+        return self.LeapFrameMsg
+    
+    def getHand(self, hand):
+        roshand = LeapHand()
+        roshand.id = hand.id
+        
+        #fingers, tools, pointables
+        
+        #hand data
+        roshand.palm_pos.cartesian = hand.palm_position.to_float_array()
+        roshand.palm_pos.angular = [
+            hand.palm_position.pitch,
+            hand.palm_position.yaw,
+            hand.palm_position.roll
+            ]
+        roshand.palm_vel.cartesian = hand.palm_velocity.to_float_array()
+        roshand.palm_normal.cartesian = hand.palm_normal.to_float_array()
+        roshand.direction.cartesian = hand.direction.to_float_array()
+        roshand.sphere_center.cartesian = hand.sphere_center.to_float_array()
+        roshand.translation.cartesian = hand.translation(self.frame).to_float_array()
+        
+        roshand.isValid = hand.is_valid
+        roshand.sphere_radius = hand.sphere_radius
+                
+        return roshand
+    
+    def getFinger(self, finger):
+        pass
+
+    def getTool(self, tool):
+        pass
+    
+    def getPointable(self, pointable):
+        pass
+
+    def getGesture(self, gesture):
+        pass
+    
 class ROSLeapListener(Leap.Listener):
     def on_init(self, controller):
         rospy.init_node('ROSLeapNode')
         rosprint("initialzing leapmotion...")
         #ROS topic handle
-        self.LeapMsg = LeapmotionMsg()
         self.LeapPub = rospy.Publisher('/leap', LeapmotionMsg)
+        self.frameList = []
         
     def on_connect(self, controller):
         rosprint("leapmotion connected...ready to retrieve frame data...")
@@ -84,20 +126,16 @@ class ROSLeapListener(Leap.Listener):
         rosprint("leapmotion exited...")
     
     def on_frame(self, controller):
+        
         frame = controller.frame()
-        #rosprint(str(frame.id))
         
+        #generate ROSLeap msg
         rosleapMsg = ROSLeapMsg(frame)
-        
         #publish
         self.publish(rosleapMsg.getMsg())
+    
     def publish(self, msg):
-        self.LeapMsg.frameID = msg['id']
-        self.LeapMsg.timeStamp = msg['timeStamp']
-        self.LeapMsg.vector.cartesian = msg['deviceVector']['cartesian']
-        self.LeapMsg.vector.angular = msg['deviceVector']['angular']
-        
-        self.LeapPub.publish(self.LeapMsg)
+        self.LeapPub.publish(msg)
 
 if __name__ == "__main__":
     listener = ROSLeapListener()
