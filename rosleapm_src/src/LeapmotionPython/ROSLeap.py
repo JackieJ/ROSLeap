@@ -52,8 +52,9 @@ class ROSLeapMsg:
             self.LeapFrameMsg.hands.append(self.getHand(hand))
         
         #fingers
-        #self.LeapFrameMsg['fingers'] = self.frame.fingers
-        
+        for finger in self.frame.fingers:
+            self.LeapFrameMsg.fingers.append(self.getFinger(finger))
+                
         #tools
         #self.LeapFrameMsg['tools'] = self.frame.tools
         
@@ -70,6 +71,8 @@ class ROSLeapMsg:
         roshand.id = hand.id
         
         #fingers, tools, pointables
+        for finger in hand.fingers:
+            roshand.fingers.append(self.getFinger(finger))
         
         #hand data
         roshand.palm_pos.cartesian = hand.palm_position.to_float_array()
@@ -86,12 +89,18 @@ class ROSLeapMsg:
         
         roshand.isValid = hand.is_valid
         roshand.sphere_radius = hand.sphere_radius
-                
         return roshand
     
     def getFinger(self, finger):
-        pass
-
+        rosfinger = LeapFinger()
+        rosfinger.id = finger.id
+        rosfinger.tip_position.cartesian = finger.tip_position.to_float_array()
+        rosfinger.tip_velocity.cartesian = finger.tip_velocity.to_float_array()
+        rosfinger.direction.cartesian = finger.direction.to_float_array()
+        rosfinger.is_finger = finger.is_finger
+        rosfinger.is_valid = finger.is_valid
+        return rosfinger
+    
     def getTool(self, tool):
         pass
     
