@@ -16,3 +16,5 @@ _Warning: updating the kernel might cause some malfunctionality of the system._
   * run `./setup_ardrone.sh` to set up A.R.Drone          
   * run `./LeapARDrone.sh` under the `launch` folder to control with Leapmotion     
 
+###Knowledge Base      
+[Leapmotion API Documentation](https://developer.leapmotion.com/documentation/Languages/Python/API/index.html).
