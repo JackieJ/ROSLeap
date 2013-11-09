@@ -1,3 +1,3 @@
 #!/bin/bash
 
-roslaunch ./files/LeapARDrone.launch
+roslaunch ./files/Leap.launch

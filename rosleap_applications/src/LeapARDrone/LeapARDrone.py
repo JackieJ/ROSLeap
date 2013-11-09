@@ -9,4 +9,6 @@ import rospy
 import roslib; roslib.load_manifest("geometry_msgs")
 from geometry_msgs.msg import *
 
-
+class LeapARDrone():
+    def on_init(self):
+        rospy.init_node('LeapARNode')
