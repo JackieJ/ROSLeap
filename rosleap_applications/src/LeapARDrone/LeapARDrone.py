@@ -22,7 +22,10 @@ class LeapARDrone:
         #Topic Handlers
         self.LeapARPub = rospy.Publisher('/cmd_vel', Twist)
         self.TwistMsg = Twist()
-        self.THRESHHOLD = 200
+        self.VELTHRESH = 200
+        self.XTHRESH = 100
+        self.YTHRESH = 100
+        self.ZTHRESH = 100
         self.prevPos = [0,0,0]
         
     def run(self):
@@ -68,7 +71,7 @@ class LeapARDrone:
                     averageLinearTwist[index] = averageLinearTwist[index]/numberofFinger
                     averageLinearVel[index] = averageLinearVel[index]/numberofFinger
                 
-                isReadyToGo = self.isVectorAboveThreshhold(averageLinearVel, self.THRESHHOLD)
+                isReadyToGo = self.isVectorAboveThreshhold(averageLinearVel, self.VELTHRESH)
                 if isReadyToGo:
                     if averageLinearTwist[0] > 0:
                         self.TwistMsg.linear.x = 1
