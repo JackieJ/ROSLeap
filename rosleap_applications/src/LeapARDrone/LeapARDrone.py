@@ -78,10 +78,10 @@ class LeapARDrone:
                     else:
                         self.TwistMsg.linear.x = -1
                     
-                    if averageLinearTwist[1] > 0:
-                        self.TwistMsg.linear.y = 1
-                    else:
-                        self.TwistMsg.linear.y = -1
+                    #if averageLinearTwist[1] > 0:
+                    #    self.TwistMsg.linear.y = 1
+                    #else:
+                    #    self.TwistMsg.linear.y = -1
                     
                     if averageLinearTwist[2] > 0:
                         self.TwistMsg.linear.z = 1
