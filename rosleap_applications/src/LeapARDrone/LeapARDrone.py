@@ -10,6 +10,7 @@ import roslib; roslib.load_manifest("geometry_msgs")
 import roslib; roslib.load_manifest("rosleap_msg")
 from geometry_msgs.msg import *
 from rosleap_msg.msg import *
+import math
 
 #helper functions
 def rosprint(string):
@@ -22,10 +23,10 @@ class LeapARDrone:
         #Topic Handlers
         self.LeapARPub = rospy.Publisher('/cmd_vel', Twist)
         self.TwistMsg = Twist()
-        self.VELTHRESH = 200
-        self.XTHRESH = 100
-        self.YTHRESH = 100
-        self.ZTHRESH = 100
+        self.VELTHRESH = 150
+        self.XTHRESH = 50
+        self.YTHRESH = 50
+        self.ZTHRESH = 50
         self.prevPos = [0,0,0]
         
     def run(self):
@@ -66,29 +67,46 @@ class LeapARDrone:
                     averageLinearTwist[1] += pos_vector[1]
                     averageLinearTwist[2] += pos_vector[2]
                 
-                #average
+                #average vel and twist
                 for index in range(0,3):
                     averageLinearTwist[index] = averageLinearTwist[index]/numberofFinger
                     averageLinearVel[index] = averageLinearVel[index]/numberofFinger
                 
-                isReadyToGo = self.isVectorAboveThreshhold(averageLinearVel, self.VELTHRESH)
-                if isReadyToGo:
-                    if averageLinearTwist[0] > 0:
-                        self.TwistMsg.linear.x = 1
+                shouldUpdate = False    
+                x = averageLinearTwist[0] - self.prevPos[0]
+                if math.fabs(x) > self.XTHRESH:
+                    shouldUpdate = True
+                    if x > 0:
+                        self.TwistMsg.linear.y = -1
                     else:
+                        self.TwistMsg.linear.y = 1
+                
+                y = averageLinearTwist[1] - self.prevPos[1]
+                #if math.fabs(y) > self.YTHRESH:
+                #    shouldUpdate = True
+                #    if y > 0:
+                #        self.TwistMsg.linear.z = 1
+                #    else:
+                #        self.TwistMsg.linear.z = -1
+                
+                z = averageLinearTwist[2] - self.prevPos[2]
+                if math.fabs(z) > self.ZTHRESH:
+                    shouldUpdate = True
+                    if z > 0:
                         self.TwistMsg.linear.x = -1
-                    
-                    #if averageLinearTwist[1] > 0:
-                    #    self.TwistMsg.linear.y = 1
-                    #else:
-                    #    self.TwistMsg.linear.y = -1
-                    
-                    if averageLinearTwist[2] > 0:
-                        self.TwistMsg.linear.z = 1
                     else:
-                        self.TwistMsg.linear.z = -1
+                        self.TwistMsg.linear.x = 1
                     
-                    self.publish()
+                if shouldUpdate:
+                    shouldUpdate = False
+                    #self.prevPos[0] = averageLinearTwist[0]
+                    #self.prevPos[1] = averageLinearTwist[1]
+                    #self.prevPos[2] = averageLinearTwist[2]
+                                    
+                self.publish()
+                self.TwistMsg.linear.x = 0
+                self.TwistMsg.linear.y = 0
+                self.TwistMsg.linear.z = 0
                 
 
     def angularControl(self, data):
