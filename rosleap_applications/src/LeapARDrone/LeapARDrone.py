@@ -25,13 +25,17 @@ class LeapARDrone:
         self.TwistMsg = Twist()
         self.VELTHRESH = 150
         self.XTHRESH = 50
-        self.YTHRESH = 50
-        self.ZTHRESH = 50
+        self.YTHRESH = 300
+        self.ZTHRESH = 30
+        self.XVELTHRESH = 100
+        self.YVELTHRESH = 300
+        self.ZVELTHRESH = 100
+        self.YAWTHRESH = 0.6
         self.prevPos = [0,0,0]
         
     def run(self):
-        #linear control
-        rospy.Subscriber('/leap', LeapmotionMsg, self.linearControl)
+        rospy.Subscriber('/leap', LeapmotionMsg, self.linearControlByFingerPos)
+        #rospy.Subscriber('/leap', LeapmotionMsg, self.restrictedControl)
         rospy.spin()
     
     #helper functions
@@ -42,7 +46,7 @@ class LeapARDrone:
         return False
     
     #control callbacks
-    def linearControl(self, data):
+    def linearControlByFingerPos(self, data):
         #rosprint('[LeapAR][LinearControl] processing data...')
         #obtain the hand 
         hands = data.hands
@@ -54,10 +58,12 @@ class LeapARDrone:
                 averageLinearTwist = [0,0,0]
                 #velocity needs to be beyond the threshhold to qualify for publishing
                 averageLinearVel = [0,0,0]
-                isReadyToGo = False
+                #direction to yaw
+                averageLinearDirection = [0,0,0]
                 for finger in fingers:
                     vel_vector = finger.tip_velocity.cartesian
                     pos_vector = finger.tip_position.cartesian
+                    direction_vector = finger.direction.cartesian
                     #add up vel values and average after loop
                     averageLinearVel[0] += vel_vector[0]
                     averageLinearVel[1] += vel_vector[1]
@@ -66,55 +72,124 @@ class LeapARDrone:
                     averageLinearTwist[0] += pos_vector[0]
                     averageLinearTwist[1] += pos_vector[1]
                     averageLinearTwist[2] += pos_vector[2]
-                
+                    #direction
+                    averageLinearDirection[0] += direction_vector[0]
+                    averageLinearDirection[1] += direction_vector[1]
+                    averageLinearDirection[2] += direction_vector[2]
+                    
                 #average vel and twist
                 for index in range(0,3):
                     averageLinearTwist[index] = averageLinearTwist[index]/numberofFinger
                     averageLinearVel[index] = averageLinearVel[index]/numberofFinger
-                
-                shouldUpdate = False    
-                x = averageLinearTwist[0] - self.prevPos[0]
-                if math.fabs(x) > self.XTHRESH:
-                    shouldUpdate = True
-                    if x > 0:
-                        self.TwistMsg.linear.y = -1
-                    else:
-                        self.TwistMsg.linear.y = 1
-                
-                y = averageLinearTwist[1] - self.prevPos[1]
-                #if math.fabs(y) > self.YTHRESH:
-                #    shouldUpdate = True
-                #    if y > 0:
-                #        self.TwistMsg.linear.z = 1
-                #    else:
-                #        self.TwistMsg.linear.z = -1
-                
-                z = averageLinearTwist[2] - self.prevPos[2]
-                if math.fabs(z) > self.ZTHRESH:
-                    shouldUpdate = True
-                    if z > 0:
-                        self.TwistMsg.linear.x = -1
-                    else:
-                        self.TwistMsg.linear.x = 1
+                    averageLinearDirection[index] = averageLinearDirection[index]/numberofFinger
                     
-                if shouldUpdate:
-                    shouldUpdate = False
-                    #self.prevPos[0] = averageLinearTwist[0]
-                    #self.prevPos[1] = averageLinearTwist[1]
-                    #self.prevPos[2] = averageLinearTwist[2]
-                                    
+                isDirectionChanged = False
+                yaw = averageLinearDirection[0]
+                if math.fabs(yaw) > self.YAWTHRESH:
+                    isDirectionChanged = True
+                    if yaw > 0:
+                        self.TwistMsg.angular.z = -1
+                    else:
+                        self.TwistMsg.angular.z = 1
+                
+                if isDirectionChanged == False:
+                    x = averageLinearTwist[0] - self.prevPos[0]
+                    if math.fabs(x) > self.XTHRESH:
+                        if x > 0:
+                            self.TwistMsg.linear.y = -1
+                        else:
+                            self.TwistMsg.linear.y = 1
+                
+                    y = averageLinearVel[1]
+                    if math.fabs(y) > self.YTHRESH:
+                        if y > 0:
+                            self.TwistMsg.linear.z = 1
+                        else:
+                            self.TwistMsg.linear.z = -1
+                
+                    z = averageLinearTwist[2] - self.prevPos[2]
+                    if math.fabs(z) > self.ZTHRESH:
+                        if z > 0:
+                            self.TwistMsg.linear.x = -1
+                        else:
+                            self.TwistMsg.linear.x = 1
+                    
                 self.publish()
                 self.TwistMsg.linear.x = 0
                 self.TwistMsg.linear.y = 0
                 self.TwistMsg.linear.z = 0
+                self.TwistMsg.angular.z = 0
                 
 
-    def angularControl(self, data):
+    def restrictedControl(self, data):
+        #rosprint('[LeapAR][LinearControl] processing data...')
+        #obtain the hand 
+        hands = data.hands
+        if len(hands) != 0:
+            fingers = hands[0].fingers
+            numberofFinger = len(fingers)
+            if numberofFinger != 0:
+                #linear twist, x,y,z
+                averageLinearDirection = [0,0,0]
+                #velocity needs to be beyond the threshhold to qualify for publishing
+                averageLinearVel = [0,0,0]
+                for finger in fingers:
+                    vel_vector = finger.tip_velocity.cartesian
+                    direction_vector = finger.direction.cartesian
+                    #add up vel values and average after loop
+                    averageLinearVel[0] += vel_vector[0]
+                    averageLinearVel[1] += vel_vector[1]
+                    averageLinearVel[2] += vel_vector[2]
+                    #add up pos values and average after loop
+                    averageLinearDirection[0] += direction_vector[0]
+                    averageLinearDirection[1] += direction_vector[1]
+                    averageLinearDirection[2] += direction_vector[2]
+                
+                #average vel and twist
+                for index in range(0,3):
+                    averageLinearDirection[index] = averageLinearDirection[index]/numberofFinger
+                    averageLinearVel[index] = averageLinearVel[index]/numberofFinger
+                
+                isDirectionChanged = False
+                yaw = averageLinearDirection[0]
+                if math.fabs(yaw) > self.YAWTHRESH:
+                    isDirectionChanged = True
+                    if yaw > 0:
+                        self.TwistMsg.angular.z = -1
+                    else:
+                        self.TwistMsg.angular.z = 1
+                    
+                if isDirectionChanged == False:
+                    x = averageLinearVel[0]
+                    if math.fabs(x) > self.XVELTHRESH:
+                        if x > 0:
+                            self.TwistMsg.linear.y = -1
+                        else:
+                            self.TwistMsg.linear.y = 1
+                            
+                    y = averageLinearVel[1]
+                    if math.fabs(y) > self.YVELTHRESH:
+                        if y > 0:
+                            self.TwistMsg.linear.z = 1
+                        else:
+                            self.TwistMsg.linear.z = -1
+                            
+                    z = averageLinearVel[2]
+                    if math.fabs(z) > self.ZVELTHRESH:
+                        if z > 0:
+                            self.TwistMsg.linear.x = -1
+                        else:
+                            self.TwistMsg.linear.x = 1
+                                                                    
+                self.publish()
+                self.TwistMsg.linear.x = 0
+                self.TwistMsg.linear.y = 0
+                self.TwistMsg.linear.z = 0
+                self.TwistMsg.angular.z = 0
+                
+    def sphereControl(self, data):
         pass
-    
-    def fusedControl(self, data):
-        pass
-    
+                
     def publish(self):
         self.LeapARPub.publish(self.TwistMsg)        
             
