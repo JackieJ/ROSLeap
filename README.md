@@ -14,7 +14,7 @@ _Warning: updating the kernel might cause some malfunctionality of the system._
   * run `./Leap.sh` under the `launch` folder     
 * Leap-A.R.Drone       
   * run `./setup_ardrone.sh` to set up A.R.Drone          
-  * run `./LeapARDrone.sh` under the `launch` folder to control with Leapmotion     
+  * run `./LeapARDrone_ControlByPos.sh` under the `launch` folder to control with Leapmotion by placing your hand to different position.     
 
 ###Knowledge Base      
 [Leapmotion API Documentation](https://developer.leapmotion.com/documentation/Languages/Python/API/index.html).
