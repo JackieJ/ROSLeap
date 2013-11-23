@@ -16,10 +16,10 @@ import math
 def rosprint(string):
     rospy.loginfo(string)
 
-class LeapARDrone:
+class LeapARDroneControlByPos:
     def __init__(self):
         rospy.init_node('LeapARNode')
-        rosprint('starting leapmotion-ardrone control...')
+        rosprint('[ControlByPos]starting leapmotion-ardrone control...')
         #Topic Handlers
         self.LeapARPub = rospy.Publisher('/cmd_vel', Twist)
         self.TwistMsg = Twist()
@@ -196,7 +196,7 @@ class LeapARDrone:
 
 if __name__ == "__main__":
     try:
-        LeapAR = LeapARDrone()
+        LeapAR = LeapARDroneControlByPos()
         LeapAR.run()
     except rospy.ROSInterruptException:
         rosprint('leapmotion control interrupted!')
