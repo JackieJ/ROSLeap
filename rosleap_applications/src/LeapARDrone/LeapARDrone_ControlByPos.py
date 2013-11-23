@@ -30,7 +30,7 @@ class LeapARDrone:
         self.XVELTHRESH = 100
         self.YVELTHRESH = 300
         self.ZVELTHRESH = 100
-        self.YAWTHRESH = 0.6
+        self.YAWTHRESH = 0.5
         self.prevPos = [0,0,0]
         
     def run(self):
@@ -106,7 +106,7 @@ class LeapARDrone:
                             self.TwistMsg.linear.z = 1
                         else:
                             self.TwistMsg.linear.z = -1
-                
+                    
                     z = averageLinearTwist[2] - self.prevPos[2]
                     if math.fabs(z) > self.ZTHRESH:
                         if z > 0:
