@@ -4,5 +4,5 @@ LeapHand[] hands
 LeapFinger[] fingers
 LeapTool[] tools
 LeapPointable[] pointables
-LeapGesture[] gestures
+LeapGestureList gestures
 LeapVector vector
