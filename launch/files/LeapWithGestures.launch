@@ -1,0 +1,3 @@
+<launch>
+        <node pkg="rosleapm_src" type="ROSLeapWithGestures.py" required="true" output="screen" name="LeapmotionMAIN"/>
+</launch>
