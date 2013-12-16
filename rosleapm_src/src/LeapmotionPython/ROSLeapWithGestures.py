@@ -65,7 +65,8 @@ class ROSLeapMsg:
         #self.LeapFrameMsg['pointables'] = self.frame.pointables
         
         #gestures
-        self.LeapFrameMsg.gesture_list = gestureProcessor.getGestures(frame)
+        self.LeapFrameMsg.gestures = gestureProcessor.getGestures(frame)
+        rosprint('ROSLeap: Swipes: ' + str(len(self.LeapFrameMsg.gestures.swipes)) + ' | Taps: ' + str(len(self.LeapFrameMsg.gestures.key_taps)))
         
         return self.LeapFrameMsg
     

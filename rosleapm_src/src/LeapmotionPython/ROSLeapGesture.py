@@ -19,9 +19,9 @@ class ROSLeapGesture:
             frame_list.pop()
         frame_list.appendleft(frame)
 
-        gestureList = LeapGestureList()
-        gestureList.swipes = getSwipes()
-        gestureList.keytaps = getKeyTaps()
+        gestures = LeapGestureList()
+        gestures.swipes = getSwipes()
+        gestures.key_taps = getKeyTaps()
         return gestureList
 
     def getSwipes():
