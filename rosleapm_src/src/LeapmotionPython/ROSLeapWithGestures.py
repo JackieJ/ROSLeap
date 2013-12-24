@@ -6,46 +6,34 @@
 import Leap,sys
 from Leap import *
 from numpy import *
+from collections import deque
 
 #ROS imports
 import rospy
 import roslib; roslib.load_manifest("rosleap_msg")
 from rosleap_msg.msg import *
 
-import ROSLeapGesture
-from ROSLeapGesture import *
 
 def rosprint(string):
     rospy.loginfo(string)
 
+
+#################### ROSLeapMsg ####################
+
+
 class ROSLeapMsg:
+
     def __init__(self, frame):
         self.frame = frame
         #define msg
         self.LeapFrameMsg = LeapmotionMsg()
-        # self.LeapFrameMsg = {
-        #     'id':0,
-        #     'timeStamp':0,
-        #     'hands':[],
-        #     'fingers':[],
-        #     'tools':[],
-        #     'gestures':[],
-        #     'pointables':[],
-        #     'conncted': False,
-        #     'deviceVector':{
-        #         'cartesian':[0,0,0], #x,y,z,
-        #         'angular':[0,0,0] #pitch, yaw, roll
-        #         }
-        #     }
         
     def getMsg(self, gestureProcessor):
         #frameId
         self.LeapFrameMsg.frameID = self.frame.id
         #device vector:x,y,z,yaw,pitch,roll 
         vector = Leap.Vector()
-        #cartesian coordinates
         self.LeapFrameMsg.vector.cartesian = vector.to_float_array()
-        #angular coordinates
         self.LeapFrameMsg.vector.angular = [vector.pitch, vector.yaw, vector.roll]
         #time stamp
         self.LeapFrameMsg.timeStamp = self.frame.timestamp
@@ -65,7 +53,7 @@ class ROSLeapMsg:
         #self.LeapFrameMsg['pointables'] = self.frame.pointables
         
         #gestures
-        self.LeapFrameMsg.gestures = gestureProcessor.getGestures(frame)
+        self.LeapFrameMsg.gestures = gestureProcessor.getGestures()
         rosprint('ROSLeap: Swipes: ' + str(len(self.LeapFrameMsg.gestures.swipes)) + ' | Taps: ' + str(len(self.LeapFrameMsg.gestures.key_taps)))
         
         return self.LeapFrameMsg
@@ -113,15 +101,64 @@ class ROSLeapMsg:
 
     def getGesture(self, gesture):
         pass
+
+
+#################### ROSLeapGesture ####################
+
+
+class ROSLeapGesture:
+
+    def __init__(self, maxframes):
+        self.MAXFRAMES = maxframes
+        self.frameList = deque()
+
+    def pushFrame(self, frame):
+        if len(self.frameList) == MAXFRAMES:
+            self.frameList.pop()
+        self.frameList.appendleft(frame)
+
+    def getGestures(self):
+        gestures = LeapGestureList()
+        gestures.swipes = self.getSwipes()
+        gestures.key_taps = self.getKeyTaps()
+        return gestures
+
+    def getSwipes(self):
+        swipeList = []
+        for gesture in self.frameList[0].gestures():
+            if gesture.type == Gesture.TYPE_SWIPE:
+                swipe = SwipeGesture(gesture)
+                swipeMsg = LeapSwipeGesture()
+                swipeMsg.start_pos = swipe.startPosition.to_float_array()
+                swipeMsg.cur_pos = swipe.position.to_float_array()
+                swipeMsg.direction = swipe.direction.to_float_array()
+                swipeMsg.speed = swipe.speed
+                swipeList.append(swipeMsg)
+        return swipeList
+
+    def getKeyTaps(self):
+        keyTapList = []
+        for gesture in self.frameList[0].gestures():
+            if gesture.type == Gesture.TYPE_KEY_TAP:
+                keyTap = KeyTapGesture(gesture)
+                keyTapMsg = LeapKeyTapGesture()
+                keyTapMsg.position = keyTap.position.to_float_array()
+                keyTapMsg.direction = keyTap.direction.to_float_array()
+                keyTapList.append(keyTapMsg)
+        return keyTapList
+
+
+#################### ROSLeapListener ####################
     
+
 class ROSLeapListener(Leap.Listener):
+
     def on_init(self, controller):
         rospy.init_node('ROSLeapNode')
         rosprint("initialzing leapmotion...")
         #ROS topic handle
         self.LeapPub = rospy.Publisher('/leap', LeapmotionMsg)
-        self.frameList = []
-        self.gestureProcessor = ROSLeapGesture()
+        self.gestureProcessor = ROSLeapGesture(1)
         
     def on_connect(self, controller):
         rosprint("leapmotion connected...ready to retrieve frame data...")
@@ -143,6 +180,8 @@ class ROSLeapListener(Leap.Listener):
         
         frame = controller.frame()
         
+        #Allow ROSLeapGesture to also receive frame
+        self.gestureProcessor.pushFrame(frame)
         #generate ROSLeap msg
         rosleapMsg = ROSLeapMsg(frame)
         #publish
@@ -160,3 +199,4 @@ if __name__ == "__main__":
     except rospy.ROSInterruptException:
         #interrupt and detatch the listener
         controller.remove_listener(listener)
+
