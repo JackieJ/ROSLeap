@@ -54,7 +54,11 @@ class ROSLeapMsg:
         
         #gestures
         self.LeapFrameMsg.gestures = gestureProcessor.getGestures()
-        rosprint('ROSLeap: Swipes: ' + str(len(self.LeapFrameMsg.gestures.swipes)) + ' | Taps: ' + str(len(self.LeapFrameMsg.gestures.key_taps)))
+
+        """if self.LeapFrameMsg.gestures.swipes:
+            spdList = ['spd: ' + str(swipe.speed) for swipe in self.LeapFrameMsg.gestures.swipes]
+            printMsg = ' | '.join(spdList)
+            rosprint(printMsg)"""
         
         return self.LeapFrameMsg
     
@@ -113,7 +117,7 @@ class ROSLeapGesture:
         self.frameList = deque()
 
     def pushFrame(self, frame):
-        if len(self.frameList) == MAXFRAMES:
+        if len(self.frameList) == self.MAXFRAMES:
             self.frameList.pop()
         self.frameList.appendleft(frame)
 
@@ -127,12 +131,17 @@ class ROSLeapGesture:
         swipeList = []
         for gesture in self.frameList[0].gestures():
             if gesture.type == Gesture.TYPE_SWIPE:
+                if swipeList:
+                    swipeList = []
+                    break
                 swipe = SwipeGesture(gesture)
                 swipeMsg = LeapSwipeGesture()
-                swipeMsg.start_pos = swipe.startPosition.to_float_array()
+                swipeMsg.start_pos = swipe.start_position.to_float_array()
                 swipeMsg.cur_pos = swipe.position.to_float_array()
                 swipeMsg.direction = swipe.direction.to_float_array()
                 swipeMsg.speed = swipe.speed
+                if swipe.speed <= 4000:
+                    break
                 swipeList.append(swipeMsg)
         return swipeList
 
@@ -144,6 +153,7 @@ class ROSLeapGesture:
                 keyTapMsg = LeapKeyTapGesture()
                 keyTapMsg.position = keyTap.position.to_float_array()
                 keyTapMsg.direction = keyTap.direction.to_float_array()
+                #if keyTap.direction.
                 keyTapList.append(keyTapMsg)
         return keyTapList
 
@@ -185,7 +195,7 @@ class ROSLeapListener(Leap.Listener):
         #generate ROSLeap msg
         rosleapMsg = ROSLeapMsg(frame)
         #publish
-        self.publish(rosleapMsg.getMsg(gestureProcessor))
+        self.publish(rosleapMsg.getMsg(self.gestureProcessor))
     
     def publish(self, msg):
         self.LeapPub.publish(msg)
