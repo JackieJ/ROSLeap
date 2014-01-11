@@ -1,5 +1,5 @@
+uint64 id
 LeapVector tip_position
 LeapVector tip_velocity
 LeapVector direction
-LeapVector stabilized_tip_position
 bool is_valid

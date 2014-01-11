@@ -14,5 +14,3 @@
   <depend package="std_msgs"/>
   <depend package="rosleap_msg"/>
 </package>
-
-
