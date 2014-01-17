@@ -106,8 +106,12 @@ class ROSLeapMsg:
     
     def getPointable(self, pointable):
         rospointable = LeapPointable()
+        rospointable.id = pointable.id
+        rospointable.tip_position.cartesian = pointable.tip_position.to_float_array()
+        rospointable.tip_velocity.cartesian = pointable.tip_velocity.to_float_array()
+        rospointable.direction.cartesian = pointable.direction.to_float_array()
+        return rospointable
         
-
     def getGesture(self, gesture):
         pass
     

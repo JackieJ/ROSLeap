@@ -39,6 +39,8 @@ class LeapARDroneControlByPath:
     def pathVizTest(self, data):
         #record coords, do regression and display the playback data
         
+
+
         pass
 
     def publish(self):
