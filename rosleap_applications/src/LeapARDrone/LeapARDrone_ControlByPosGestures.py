@@ -49,14 +49,12 @@ class LeapARDrone:
     def linearControlByFingerPos(self, data):
         #rosprint('[LeapAR][LinearControl] processing data...')
         gestures = data.gestures
-        rosprint('LeapARDrone: Swipes: ' + str(len(gestures.swipes)) + ' | Taps: ' + str(len(gestures.key_taps)))
         if gestures.swipes:
-            rosprint('Swipe data: ' + str(gestures.swipes[0].cur_pos))
             self.state = 1
         if gestures.key_taps:
-            rosprint('Tap data: ' + str(gestures.key_taps[0].position))
             self.state = 0
 
+        rosprint("State: {0}".format(self.state))
         if self.state == 1:
             self.TwistMsg.linear.x = 1
         if self.state == 0:
@@ -128,11 +126,11 @@ class LeapARDrone:
                     else:
                         self.TwistMsg.linear.x = 1
                 
-            self.publish()
-            self.TwistMsg.linear.x = 0
-            self.TwistMsg.linear.y = 0
-            self.TwistMsg.linear.z = 0
-            self.TwistMsg.angular.z = 0
+        self.publish()
+        self.TwistMsg.linear.x = 0
+        self.TwistMsg.linear.y = 0
+        self.TwistMsg.linear.z = 0
+        self.TwistMsg.angular.z = 0
                 
 
     def restrictedControl(self, data):

@@ -133,9 +133,9 @@ class ROSLeapGesture:
             if gesture.type == Gesture.TYPE_SWIPE:
                 swipe = SwipeGesture(gesture)
                 swipeMsg = LeapSwipeGesture()
-                swipeMsg.start_pos = swipe.start_position.to_float_array()
-                swipeMsg.cur_pos = swipe.position.to_float_array()
-                swipeMsg.direction = swipe.direction.to_float_array()
+                swipeMsg.start_pos.cartesian = swipe.start_position.to_float_array()
+                swipeMsg.cur_pos.cartesian = swipe.position.to_float_array()
+                swipeMsg.direction.cartesian = swipe.direction.to_float_array()
                 swipeMsg.speed = swipe.speed
                 if (
                    swipe.speed > 3000 and
@@ -154,8 +154,8 @@ class ROSLeapGesture:
             if gesture.type == Gesture.TYPE_KEY_TAP:
                 keyTap = KeyTapGesture(gesture)
                 keyTapMsg = LeapKeyTapGesture()
-                keyTapMsg.position = keyTap.position.to_float_array()
-                keyTapMsg.direction = keyTap.direction.to_float_array()
+                keyTapMsg.position.cartesian = keyTap.position.to_float_array()
+                keyTapMsg.direction.cartesian = keyTap.direction.to_float_array()
                 if (
                    keyTap.direction.y < -0.9 and
                    abs(keyTap.position.x) < 50 and
