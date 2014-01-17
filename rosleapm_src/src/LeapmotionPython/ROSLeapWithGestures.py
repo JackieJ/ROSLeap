@@ -55,10 +55,10 @@ class ROSLeapMsg:
         #gestures
         self.LeapFrameMsg.gestures = gestureProcessor.getGestures()
 
-        """if self.LeapFrameMsg.gestures.swipes:
-            spdList = ['spd: ' + str(swipe.speed) for swipe in self.LeapFrameMsg.gestures.swipes]
-            printMsg = ' | '.join(spdList)
-            rosprint(printMsg)"""
+        #if self.LeapFrameMsg.gestures.key_taps:
+        #    dataList = ['{0}|{1}'.format(g.position, g.direction) for g in self.LeapFrameMsg.gestures.key_taps]
+        #    printMsg = ' --- '.join(dataList)
+        #    rosprint(printMsg)
         
         return self.LeapFrameMsg
     
@@ -131,18 +131,21 @@ class ROSLeapGesture:
         swipeList = []
         for gesture in self.frameList[0].gestures():
             if gesture.type == Gesture.TYPE_SWIPE:
-                if swipeList:
-                    swipeList = []
-                    break
                 swipe = SwipeGesture(gesture)
                 swipeMsg = LeapSwipeGesture()
                 swipeMsg.start_pos = swipe.start_position.to_float_array()
                 swipeMsg.cur_pos = swipe.position.to_float_array()
                 swipeMsg.direction = swipe.direction.to_float_array()
                 swipeMsg.speed = swipe.speed
-                if swipe.speed <= 4000:
-                    break
-                swipeList.append(swipeMsg)
+                if (
+                   swipe.speed > 3000 and
+                   swipe.direction.x < -0.8 and
+                   abs(swipe.direction.y) < 0.15 and
+                   abs(swipe.direction.z) < 0.40 and
+                   swipe.position.y > 150 and swipe.position.y < 350 and
+                   abs(swipe.position.z) < 150
+                   ):
+                    swipeList.append(swipeMsg)
         return swipeList
 
     def getKeyTaps(self):
@@ -153,8 +156,13 @@ class ROSLeapGesture:
                 keyTapMsg = LeapKeyTapGesture()
                 keyTapMsg.position = keyTap.position.to_float_array()
                 keyTapMsg.direction = keyTap.direction.to_float_array()
-                #if keyTap.direction.
-                keyTapList.append(keyTapMsg)
+                if (
+                   keyTap.direction.y < -0.9 and
+                   abs(keyTap.position.x) < 50 and
+                   abs(keyTap.position.z) < 50 and
+                   keyTap.position.y > 100 and keyTap.position.y < 350
+                   ):
+                    keyTapList.append(keyTapMsg)
         return keyTapList
 
 

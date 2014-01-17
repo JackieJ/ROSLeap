@@ -36,7 +36,6 @@ class LeapARDrone:
         
     def run(self):
         rospy.Subscriber('/leap', LeapmotionMsg, self.linearControlByFingerPos)
-        #rospy.Subscriber('/leap', LeapmotionMsg, self.restrictedControl)
         rospy.spin()
     
     #helper functions
