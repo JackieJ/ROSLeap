@@ -56,14 +56,9 @@ class ROSLeapMsg:
             self.LeapFrameMsg.fingers.append(self.getFinger(finger))
                 
         #pointables
-        self.LeapFrameMsg['pointables'] = self.frame.pointables
-        
-        #tools
-        #self.LeapFrameMsg['tools'] = self.frame.tools
-        
-        #gestures
-        #self.LeapFrameMsg['gestures'] = self.frame.gestures()
-        
+        for pointable in self.frame.pointables:
+            self.LeapFrameMsg.pointables.append(self.getPointable(pointable))
+                    
         return self.LeapFrameMsg
     
     def getHand(self, hand):
