@@ -56,7 +56,7 @@ class LeapARDrone:
 
         rosprint("State: {0}".format(self.state))
         if self.state == 1:
-            self.TwistMsg.linear.x = 1
+            self.TwistMsg.linear.x = 0.1
         if self.state == 0:
             #obtain the hand 
             hands = data.hands
