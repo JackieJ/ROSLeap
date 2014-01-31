@@ -6,8 +6,10 @@
 from numpy import *
 
 import rospy
+import rosbag
 import roslib; roslib.load_manifest("geometry_msgs")
 import roslib; roslib.load_manifest("rosleap_msg")
+from std_msgs.msg import *
 from geometry_msgs.msg import *
 from rosleap_msg.msg import *
 import math
@@ -22,8 +24,9 @@ class LeapARDroneControlByPath:
         rosprint('[ControlByPath]starting leapmotion-ardrone control...')
         #Topic Handlers
         self.LeapARPub = rospy.Publisher('/cmd_vel', Twist)
-        self.TwistMsg = Twist()
-                
+        self.TwistMsgs = [] #list of twist msgs from path drown
+        self.bag = rosbag.Bag('path.bag', 'rw')
+    
     def run(self):
         #test
         rospy.Subscriber('/leap', LeapmotionMsg, self.pathVizTest)
