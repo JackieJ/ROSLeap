@@ -1,0 +1,8 @@
+<launch>
+        <node pkg="ardrone_autonomy" type="ardrone_driver" required="true" output="screen" name="DroneDriver"/>
+        <node pkg="tum_ardrone" type="drone_stateestimation" required="true" output="screen" name="StateEstimator"/>
+        <node pkg="tum_ardrone" type="drone_autopilot" output="screen" name="AutoPilot"/>
+        <node pkg="tum_ardrone" type="drone_gui" respawn="true" output="screen" name="GUI"/>
+        <node pkg="rosleapm_src" type="ROSLeap.py" required="true" output="screen" name="LeapmotionMAIN"/>
+        <node pkg="rosleap_applications" type="LeapARDrone_ControlByPath.py" output="screen" name="LeapARDrone_ControlByPath"/>
+</launch>
