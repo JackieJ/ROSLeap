@@ -25,7 +25,8 @@ class LeapARDroneControlByPath:
         #Topic Handlers
         self.LeapARPub = rospy.Publisher('/cmd_vel', Twist)
         self.TwistMsgs = [] #list of twist msgs from path drown
-        self.bag = rosbag.Bag('path.bag', 'rw')
+        self.pathBag = rosbag.Bag('path.bag', 'w')
+        self.twistBag = rosbag.Bag('twist.bag', 'w')
     
     def run(self):
         #test
@@ -39,13 +40,39 @@ class LeapARDroneControlByPath:
                 return True
         return False
     
+    def twistMsgGenerator(self, bag):
+        pass
+    
     def pathVizTest(self, data):
         #record coords, do regression and display the playback data
-        
+        hands = data.hands
+        #activate drawing when 
+        if len(hands) == 1:
+            fingers = hands[0].fingers
+            numberofFinger = len(fingers)
+            if numberofFinger != 0:
+                #linear twist, x,y,z
+                averageLinearTwist = [0,0,0]
+                for finger in fingers:
+                    pos_vector = finger.tip_position.cartesian
+                    averageLinearTwist[0] += pos_vector[0]
+                    averageLinearTwist[1] += pos_vector[1]
+                    averageLinearTwist[2] += pos_vector[2]
+                #average twist
+                for index in range(0,3):
+                    averageLinearTwist[index] = averageLinearTwist[index]/numberofFinger
+                #write to the twist bag
+                
+                
+                
+        else:
+            #replay data to generate twist msg
+            twistMsgGenerator(self.bag)
+            
         pass
-
-    def publish(self):
-        self.LeapARPub.publish(self.TwistMsg)        
+    
+    def publish(self, data):
+        self.LeapARPub.publish(data)        
             
 
 if __name__ == "__main__":
