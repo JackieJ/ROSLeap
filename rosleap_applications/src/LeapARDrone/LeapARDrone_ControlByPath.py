@@ -13,6 +13,7 @@ from std_msgs.msg import *
 from geometry_msgs.msg import *
 from rosleap_msg.msg import *
 import math
+from collections import deque
 
 #helper functions
 def rosprint(string):
@@ -24,10 +25,15 @@ class LeapARDroneControlByPath:
         rosprint('[ControlByPath]starting leapmotion-ardrone control...')
         #Topic Handlers
         self.LeapARPub = rospy.Publisher('/cmd_vel', Twist)
-        self.TwistMsgs = [] #list of twist msgs from path drown
+        self.pathMsgs = deque() #queue of path drawn by the finger
+        self.twistMsgs = deque() #queue of twist msgs from path drawn
         self.pathBag = rosbag.Bag('path.bag', 'w')
         self.twistBag = rosbag.Bag('twist.bag', 'w')
     
+        #constants
+        self.QUEUESIZE = 10
+        self.POSTHRESHHOLD = 5
+        
     def run(self):
         #test
         rospy.Subscriber('/leap', LeapmotionMsg, self.pathVizTest)
@@ -44,6 +50,7 @@ class LeapARDroneControlByPath:
         pass
     
     def pathVizTest(self, data):
+        twistMsg = Twist()
         #record coords, do regression and display the playback data
         hands = data.hands
         #activate drawing when 
@@ -64,12 +71,9 @@ class LeapARDroneControlByPath:
                 #write to the twist bag
                 
                 
-                
         else:
             #replay data to generate twist msg
-            twistMsgGenerator(self.bag)
-            
-        pass
+            twistMsgGenerator(self.pathBag)
     
     def publish(self, data):
         self.LeapARPub.publish(data)        

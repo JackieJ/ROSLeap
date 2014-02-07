@@ -9,8 +9,10 @@ from numpy import *
 
 #ROS imports
 import rospy
+import rosbag
 import roslib; roslib.load_manifest("rosleap_msg")
 from rosleap_msg.msg import *
+
 
 def rosprint(string):
     rospy.loginfo(string)
@@ -35,6 +37,7 @@ class ROSLeapMsg:
         #         }
         #     }
         
+
     def getMsg(self):
         #frameId
         self.LeapFrameMsg.frameID = self.frame.id
@@ -110,6 +113,8 @@ class ROSLeapMsg:
     def getGesture(self, gesture):
         pass
     
+leapBag = rosbag.Bag('/home/jackie/Projects/ROSLeap/rosleapm_src/src/LeapmotionPython/leap.bag','w')
+
 class ROSLeapListener(Leap.Listener):
     def on_init(self, controller):
         rospy.init_node('ROSLeapNode')
@@ -117,7 +122,7 @@ class ROSLeapListener(Leap.Listener):
         #ROS topic handle
         self.LeapPub = rospy.Publisher('/leap', LeapmotionMsg)
         self.frameList = []
-        
+                
     def on_connect(self, controller):
         rosprint("leapmotion connected...ready to retrieve frame data...")
         # Enable gestures
@@ -144,6 +149,8 @@ class ROSLeapListener(Leap.Listener):
         self.publish(rosleapMsg.getMsg())
     
     def publish(self, msg):
+        #bag the data for testing
+        leapBag.write('/leap', msg)
         self.LeapPub.publish(msg)
 
 if __name__ == "__main__":
@@ -154,4 +161,5 @@ if __name__ == "__main__":
         rospy.spin()
     except rospy.ROSInterruptException:
         #interrupt and detatch the listener
+        leapBag.close()
         controller.remove_listener(listener)
