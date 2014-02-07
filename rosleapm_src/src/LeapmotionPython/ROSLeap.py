@@ -9,7 +9,6 @@ from numpy import *
 
 #ROS imports
 import rospy
-import rosbag
 import roslib; roslib.load_manifest("rosleap_msg")
 from rosleap_msg.msg import *
 
@@ -113,8 +112,6 @@ class ROSLeapMsg:
     def getGesture(self, gesture):
         pass
     
-leapBag = rosbag.Bag('/home/jackie/Projects/ROSLeap/rosleapm_src/src/LeapmotionPython/leap.bag','w')
-
 class ROSLeapListener(Leap.Listener):
     def on_init(self, controller):
         rospy.init_node('ROSLeapNode')
@@ -149,8 +146,6 @@ class ROSLeapListener(Leap.Listener):
         self.publish(rosleapMsg.getMsg())
     
     def publish(self, msg):
-        #bag the data for testing
-        leapBag.write('/leap', msg)
         self.LeapPub.publish(msg)
 
 if __name__ == "__main__":
