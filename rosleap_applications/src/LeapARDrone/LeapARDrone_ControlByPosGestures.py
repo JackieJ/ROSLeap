@@ -53,6 +53,8 @@ class LeapARDrone:
             self.state = 1
         if gestures.key_taps:
             self.state = 0
+        if gestures.spread:
+            pass
 
         rosprint("State: {0}".format(self.state))
         if self.state == 1:

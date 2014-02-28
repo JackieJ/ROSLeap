@@ -56,11 +56,6 @@ class ROSLeapMsg:
         #gestures
         self.LeapFrameMsg.gestures = gestureProcessor.getGestures()
 
-        if self.LeapFrameMsg.gestures.swipes:
-            dataList = ['{0}|{1}'.format(g.cur_pos, g.speed) for g in self.LeapFrameMsg.gestures.swipes]
-            printMsg = ' --- '.join(dataList)
-            rosprint(printMsg)
-        
         return self.LeapFrameMsg
     
     def getHand(self, hand):
@@ -126,21 +121,13 @@ class ROSLeapGesture:
         gestures = LeapGestureList()
         gestures.swipes = self.getSwipes()
         gestures.key_taps = self.getKeyTaps()
-        self.getSpread()
+        gestures.spread = self.getSpread()
         return gestures
 
     def average(self, vlist):
         if not vlist:
             return float('nan')
         return float(sum(vlist)) / len(vlist)
-
-    def magnitude(self, vec):
-        if not vec:
-            return float('nan')
-        vsum = 0.0
-        for i in vec:
-            vsum += i**2
-        return math.sqrt(vsum)
 
     def getSpread(self):
         spreadList = []
@@ -152,21 +139,35 @@ class ROSLeapGesture:
                 return spreadList
         spreadMsg = LeapSpreadGesture()
         fingers = self.frameList[0].hands[0].fingers
-        avg_spdsum = 0.0
+        avg_spdsum = [0.0, 0.0, 0.0]
         avg_dirsum = [0.0, 0.0, 0.0]
         avg_possum = [0.0, 0.0, 0.0]
         for f in fingers:
-            avg_spdsum += self.magnitude(f.tip_velocity.to_float_array())
             for i in range(3):
+                avg_spdsum[i] += f.tip_velocity[i]
                 avg_dirsum[i] += f.direction[i]
                 avg_possum[i] += f.tip_position[i]
-        avg_spd = avg_spdsum / 5.0
+        avg_spd = [0, 0, 0]
         avg_dir = [0, 0, 0]
         avg_pos = [0, 0, 0]
         for i in range(3):
+            avg_spd[i] = avg_spdsum[i] / 5.0
             avg_dir[i] = avg_dirsum[i] / 5.0
             avg_pos[i] = avg_possum[i] / 5.0
-        rosprint(" | ".join([str(avg_spd), str(avg_dir), str(avg_pos)]))
+
+        spreadMsg.speed.cartesian = avg_spd
+        spreadMsg.direction.cartesian = avg_dir
+        spreadMsg.position.cartesian = avg_pos
+        if (
+           avg_pos[1] >= 100 and
+           avg_pos[1] <= 350 and
+           abs(avg_dir[2]) >= 0.5 and
+           avg_spd[0] <= 600 and
+           avg_spd[2] <= 600
+           ):
+            spreadList.append(spreadMsg)
+        #rosprint(" | ".join([str(avg_spd), str(avg_dir), str(avg_pos)]))
+        return spreadList
 
     def getSwipes(self):
         swipeList = []
@@ -237,6 +238,9 @@ class ROSLeapListener(Leap.Listener):
     
     def on_frame(self, controller):
         
+        if not rospy or rospy.is_shutdown():
+            return
+
         frame = controller.frame()
         
         #Allow ROSLeapGesture to also receive frame
