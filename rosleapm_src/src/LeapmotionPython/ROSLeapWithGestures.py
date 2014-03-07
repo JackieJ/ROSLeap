@@ -159,8 +159,12 @@ class ROSLeapGesture:
         spreadMsg.direction.cartesian = avg_dir
         spreadMsg.position.cartesian = avg_pos
         if (
-           avg_pos[1] >= 100 and
-           avg_pos[1] <= 350 and
+           avg_pos[0] >= -75 and
+           avg_pos[0] <= 75 and
+           avg_pos[1] >= 75 and
+           avg_pos[1] <= 400 and
+           avg_pos[2] >= -75-50 and
+           avg_pos[2] <= 75-50 and
            abs(avg_dir[2]) >= 0.5 and
            avg_spd[0] <= 600 and
            avg_spd[2] <= 600
@@ -251,6 +255,8 @@ class ROSLeapListener(Leap.Listener):
         self.publish(rosleapMsg.getMsg(self.gestureProcessor))
     
     def publish(self, msg):
+        if not rospy or rospy.is_shutdown():
+            return
         self.LeapPub.publish(msg)
 
 if __name__ == "__main__":

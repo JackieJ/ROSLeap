@@ -33,6 +33,8 @@ class LeapARDrone:
         self.YAWTHRESH = 0.5
         self.prevPos = [0,0,0]
         self.state = 0
+        self.baseZ = None
+        self.baseZDur = 0
         
     def run(self):
         rospy.Subscriber('/leap', LeapmotionMsg, self.linearControlByFingerPos)
@@ -58,7 +60,24 @@ class LeapARDrone:
 
         rosprint("State: {0}".format(self.state))
         if self.state == 1:
-            self.TwistMsg.linear.x = 0.1
+            #self.TwistMsg.linear.x = 0.1
+            if not gestures.spread:
+                if self.baseZDur <= 0:
+                    self.baseZ = None
+                else:
+                    self.baseZDur = self.baseZDur - 1
+            else:
+                self.baseZDur = 5
+                spreadZ = gestures.spread[0].position.cartesian[1]
+                if not self.baseZ:
+                    self.baseZ = spreadZ
+                else:
+                    diffZ = spreadZ - self.baseZ
+                    if diffZ > 50:
+                        self.TwistMsg.linear.z = 0.1
+                    elif diffZ < -50:
+                        self.TwistMsg.linear.z = -0.1
+                rosprint("{0}, {1}, {2}".format(self.baseZ, spreadZ, gestures.spread[0].position.cartesian[2]))
         if self.state == 0:
             #obtain the hand 
             hands = data.hands
