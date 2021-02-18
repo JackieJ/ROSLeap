@@ -1,4 +1,4 @@
-###Setup       
+### Setup       
 * If you haven't already, please install ROS [furte](http://wiki.ros.org/fuerte/Installation/Ubuntu) or [groovy](http://wiki.ros.org/groovy/Installation/Ubuntu) on your Ubuntu. There are other Linux [distributions](http://wiki.ros.org/ROS/Installation) supported by ROS but Leapmotion works best on Ubuntu so far.
 * If you are on Ubuntu 12.04 or 12.10, most likely your kernel is outdated for the Leapmotion driver to function. 12.04 LTS now seems to have kernel 3.8 by default but please check by running `uname -a`. If the kernel version is lower than 3.8, please update the kernel image to 3.8.       
              
@@ -9,12 +9,12 @@ _Warning: updating the kernel might cause some malfunctionality of the system._
 * Enter `export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:/where/is/ROSLeap` to `~/.bashrc`, and run `source ~/.bashrc`.
 * Please run `./install_leap.sh` under the root directory to make sure the Leapmotion driver is installed and all ROS packages are rosmade.      
 
-###Applications       
+### Applications       
 * Leapmotion Message Test      
   * run `./Leap.sh` under the `launch` folder     
 * Leap-A.R.Drone       
   * run `./setup_ardrone.sh` to set up A.R.Drone          
   * run `./LeapARDrone_ControlByPos.sh` under the `launch` folder to control with Leapmotion by placing your hand to different position.     
 
-###Knowledge Base      
+### Knowledge Base      
 [Leapmotion API Documentation](https://developer.leapmotion.com/documentation/Languages/Python/API/index.html).
